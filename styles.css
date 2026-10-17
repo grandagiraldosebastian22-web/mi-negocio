@@ -139,6 +139,15 @@ button, input, textarea, select {
   overflow: hidden;
 }
 
+/* Idea 3: Viñeteado cinematográfico en los bordes para profundidad atmosférica HUD */
+.hud-ambient-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(2, 4, 10, 0.8) 100%);
+  pointer-events: none;
+}
+
 .hud-grid-overlay {
   position: absolute;
   inset: 0;
@@ -709,7 +718,11 @@ button, input, textarea, select {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 35px var(--accent-glow-strong);
+  /* Idea 3: Sombra multicapa tridimensional de halo de energía */
+  box-shadow: 
+    0 0 10px rgba(0, 242, 254, 0.8),
+    0 0 35px rgba(0, 242, 254, 0.45),
+    0 0 70px rgba(79, 172, 254, 0.25);
 }
 
 .reactor-inner-glow {
@@ -1329,7 +1342,11 @@ button, input, textarea, select {
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle, var(--accent-primary) 0%, rgba(0, 242, 254, 0.25) 70%, transparent 100%);
-  box-shadow: 0 0 50px var(--accent-glow-strong);
+  /* Idea 3: Sombra multicapa tridimensional para el reactor inmersivo gigante */
+  box-shadow: 
+    0 0 15px rgba(0, 242, 254, 0.85),
+    0 0 45px rgba(0, 242, 254, 0.5),
+    0 0 90px rgba(79, 172, 254, 0.3);
 }
 
 #immersive-audio-canvas {
