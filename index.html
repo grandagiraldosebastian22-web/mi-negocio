@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NOVA — Asistente personal futurista frontend inspirado en JARVIS. Prototipo con voz, síntesis de voz y procesamiento local en el navegador.">
+  <title>NOVA — Asistente Personal Futurista</title>
+  
+  <!-- Tipografía de Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="cyan">
+  <!-- Fondo de cuadrícula holográfica ambiental -->
+  <div class="hud-ambient-bg" aria-hidden="true">
+    <div class="hud-grid-overlay"></div>
+    <div class="hud-radial-glow"></div>
+    <div class="hud-scanline"></div>
+  </div>
+
+  <div id="app-root" class="app-container">
+    
+    <!-- Barra lateral de navegación / historial -->
+    <aside id="sidebar" class="sidebar" aria-label="Navegación y controles">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="brand-core-icon" aria-hidden="true">
+            <span class="core-ring-mini"></span>
+            <span class="core-center-dot"></span>
+          </div>
+          <div class="brand-text">
+            <h1 class="brand-title">N O V A</h1>
+            <span class="brand-tag">SISTEMA v0.1 • LOCAL</span>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="btn-icon mobile-only" aria-label="Cerrar panel lateral">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Acción principal: Nueva conversación -->
+      <div class="sidebar-action-box">
+        <button id="btn-new-chat" class="btn-neon-primary" aria-label="Iniciar nueva conversación">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Nueva Sesión</span>
+        </button>
+      </div>
+
+      <!-- Pestañas de navegación de módulos -->
+      <nav class="nav-menu" aria-label="Secciones del sistema">
+        <button id="nav-btn-chat" class="nav-tab active" data-view="chat">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Terminal de Chat</span>
+        </button>
+        <button id="nav-btn-immersive" class="nav-tab" data-view="immersive">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          <span>Modo Inmersivo (Voz)</span>
+        </button>
+        <button id="nav-btn-activity" class="nav-tab" data-view="activity">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Centro de Actividad</span>
+        </button>
+        <button id="nav-btn-settings" class="nav-tab" data-view="settings">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Configuración</span>
+        </button>
+      </nav>
+
+      <!-- Historial de conversaciones guardadas -->
+      <div class="sidebar-history-section">
+        <div class="history-title-row">
+          <span class="section-label">MEMORIA LOCAL</span>
+          <button id="btn-clear-history" class="btn-text-subtle" title="Vaciar historial local">Limpiar</button>
+        </div>
+        <div id="history-list" class="history-list" role="list">
+          <!-- Elementos de historial inyectados dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Pie de barra lateral con estado del sistema -->
+      <div class="sidebar-footer">
+        <div class="system-monitor-pill">
+          <span class="status-pulse-dot" id="system-status-dot"></span>
+          <div class="monitor-info">
+            <span class="monitor-label">NÚCLEO NEURONAL</span>
+            <span class="monitor-val" id="system-status-text">LISTO • STANDBY</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Overlay oscuro en móvil al abrir menú -->
+    <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- Contenedor Principal -->
+    <main id="main-content" class="main-content">
+      
+      <!-- Barra superior / Header -->
+      <header class="hud-top-bar">
+        <div class="header-left">
+          <button id="btn-toggle-sidebar" class="btn-icon" aria-label="Abrir menú de navegación">
+            <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="header-status-badge">
+            <div class="mini-core-indicator" id="mini-core" aria-hidden="true">
+              <span class="mini-ring"></span>
+              <span class="mini-dot"></span>
+            </div>
+            <div class="status-text-wrap">
+              <span class="status-title" id="assistant-name-display">NOVA AI</span>
+              <span class="status-state" id="assistant-state-badge">ESTADO: INACTIVO</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <span class="hud-time-display" id="hud-clock">00:00:00</span>
+        </div>
+
+        <div class="header-right">
+          <!-- Control de Audio / Lectura -->
+          <button id="btn-toggle-tts" class="btn-hud-tool active" title="Alternar lectura por voz (SpeechSynthesis)" aria-label="Lectura por voz activada">
+            <svg class="icon-speaker" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span class="tool-label">VOZ ON</span>
+          </button>
+          
+          <!-- Botón de sonido SFX -->
+          <button id="btn-toggle-sfx" class="btn-hud-tool active" title="Alternar efectos de sonido de interfaz" aria-label="Efectos de sonido">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </button>
+
+          <!-- Botón de limpieza rápida -->
+          <button id="btn-reset-session" class="btn-hud-tool" title="Reiniciar conversación actual" aria-label="Reiniciar conversación">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- SECCIÓN 1: VISTA DE CHAT PRINCIPAL -->
+      <section id="view-chat" class="view-panel active" aria-label="Conversación interactiva">
+        
+        <!-- Pantalla de bienvenida / Núcleo inicial (visible si no hay mensajes) -->
+        <div id="chat-welcome-container" class="welcome-screen">
+          <div class="core-hologram-wrap" id="main-core-widget">
+            <div class="hologram-disc disc-3"></div>
+            <div class="hologram-disc disc-2"></div>
+            <div class="hologram-disc disc-1"></div>
+            <div class="reactor-core">
+              <div class="reactor-inner-glow"></div>
+              <div class="reactor-center-lens"></div>
+            </div>
+            <div class="orbit-particle p1"></div>
+            <div class="orbit-particle p2"></div>
+            <div class="orbit-particle p3"></div>
+          </div>
+
+          <div class="welcome-text-group">
+            <h2 class="welcome-heading">SISTEMA <span class="text-glow">NOVA</span> EN LÍNEA</h2>
+            <p class="welcome-desc">Prototipo de interfaz conversacional inspirado en JARVIS. Interactúa mediante texto o dictado por voz con retroalimentación en tiempo real.</p>
+          </div>
+
+          <!-- Sugerencias rápidas -->
+          <div class="prompt-suggestions-grid">
+            <button class="prompt-card" data-prompt="¿Qué hora y fecha es en este momento?">
+              <span class="card-icon">⏱️</span>
+              <div class="card-content">
+                <strong>Hora y fecha</strong>
+                <span>Consulta el reloj del sistema</span>
+              </div>
+            </button>
+            
+            <button class="prompt-card" data-prompt="Dame un diagnóstico del estado del sistema">
+              <span class="card-icon">⚡</span>
+              <div class="card-content">
+                <strong>Diagnóstico</strong>
+                <span>Verificar estado del motor local</span>
+              </div>
+            </button>
+
+            <button class="prompt-card" data-prompt="¿Cuáles son tus directivas y capacidades?">
+              <span class="card-icon">🛡️</span>
+              <div class="card-content">
+                <strong>Directivas y alcance</strong>
+                <span>Explorar qué hace este prototipo</span>
+              </div>
+            </button>
+
+            <button class="prompt-card" data-prompt="Activa el modo de interacción por voz">
+              <span class="card-icon">🎙️</span>
+              <div class="card-content">
+                <strong>Modo Voz</strong>
+                <span>Iniciar interacción guiada por audio</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Flujo de mensajes del chat -->
+        <div id="messages-container" class="messages-viewport" role="log" aria-live="polite">
+          <!-- Mensajes agregados dinámicamente -->
+        </div>
+
+        <!-- Indicador de procesamiento / escritura -->
+        <div id="typing-indicator" class="typing-indicator hidden" aria-live="assertive">
+          <div class="typing-core-mini"></div>
+          <span class="typing-text">NOVA está procesando respuesta...</span>
+          <div class="typing-wave">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Barra inferior de entrada / dictado -->
+        <div class="chat-input-wrapper">
+          
+          <!-- Banner flotante de reconocimiento de voz -->
+          <div id="voice-listening-banner" class="voice-banner hidden" aria-live="polite">
+            <div class="voice-pulse-ring"></div>
+            <span class="voice-live-dot"></span>
+            <span id="voice-banner-text" class="voice-banner-text">Escuchando... Di algo a NOVA</span>
+            <button id="btn-cancel-voice" class="btn-text-cancel" title="Cancelar dictado">Detener</button>
+          </div>
+
+          <form id="chat-form" class="chat-form" onsubmit="return false;">
+            <!-- Botón de micrófono para dictado por voz -->
+            <button type="button" id="btn-mic" class="btn-voice-record" title="Activar dictado por voz (Web Speech API)" aria-label="Activar reconocimiento de voz">
+              <svg class="mic-icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              <span class="mic-ping"></span>
+            </button>
+
+            <!-- Campo de texto principal -->
+            <div class="input-field-container">
+              <textarea 
+                id="chat-textarea" 
+                class="chat-textarea" 
+                placeholder="Escribe una consulta o comando para NOVA..." 
+                rows="1" 
+                maxlength="1000"
+                aria-label="Mensaje para el asistente"></textarea>
+            </div>
+
+            <!-- Botón de envío -->
+            <button type="submit" id="btn-send-message" class="btn-send" aria-label="Enviar mensaje">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </form>
+
+          <!-- Aviso de privacidad transparente -->
+          <div class="input-footer-disclaimer">
+            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Privacidad local: Ejecución y memoria 100% en tu navegador • Sin envío a servidores externos</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SECCIÓN 2: VISTA MODO INMERSIVO DE VOZ -->
+      <section id="view-immersive" class="view-panel" aria-label="Modo de voz inmersivo">
+        <div class="immersive-container">
+          <div class="immersive-header">
+            <span class="hud-mono-tag">MODO INMERSIVO // INTERACCIÓN NEURAL DE VOZ</span>
+            <button id="btn-exit-immersive" class="btn-hud-tool">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <span>Volver al Chat</span>
+            </button>
+          </div>
+
+          <!-- Reactor Holográfico Gigante -->
+          <div class="immersive-core-center">
+            <div class="massive-core" id="immersive-core">
+              <div class="m-ring m-ring-4"></div>
+              <div class="m-ring m-ring-3"></div>
+              <div class="m-ring m-ring-2"></div>
+              <div class="m-ring m-ring-1"></div>
+              <div class="m-core-heart">
+                <canvas id="immersive-audio-canvas" width="300" height="300"></canvas>
+              </div>
+            </div>
+            
+            <div class="immersive-state-display">
+              <h2 id="immersive-status-text" class="immersive-status-title">STANDBY</h2>
+              <p id="immersive-transcript-preview" class="immersive-transcript">Haz clic en el reactor o activa el micrófono para iniciar la conversación...</p>
+            </div>
+          </div>
+
+          <!-- Barra de visualización de ondas y controles -->
+          <div class="immersive-controls-bar">
+            <div class="audio-wave-bars" id="audio-wave-bars">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+
+            <div class="immersive-action-buttons">
+              <button id="btn-immersive-mic" class="btn-giant-mic" aria-label="Alternar micrófono en modo inmersivo">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                <span>HABLAR CON NOVA</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: VISTA CENTRO DE ACTIVIDAD -->
+      <section id="view-activity" class="view-panel" aria-label="Centro de actividad y métricas">
+        <div class="activity-container">
+          <div class="activity-header">
+            <div>
+              <h2 class="view-title">Centro de Actividad</h2>
+              <p class="view-subtitle">Telemetría de la sesión actual y eventos del sistema local.</p>
+            </div>
+            <button id="btn-export-session" class="btn-hud-tool">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Exportar Reporte JSON</span>
+            </button>
+          </div>
+
+          <!-- Tarjetas de métricas -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon">💬</div>
+              <div class="metric-data">
+                <span class="metric-val" id="metric-total-messages">0</span>
+                <span class="metric-name">Mensajes Totales</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">🎙️</div>
+              <div class="metric-data">
+                <span class="metric-val" id="metric-voice-queries">0</span>
+                <span class="metric-name">Dictados por Voz</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">⏱️</div>
+              <div class="metric-data">
+                <span class="metric-val" id="metric-session-duration">00:00</span>
+                <span class="metric-name">Tiempo de Sesión</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">💾</div>
+              <div class="metric-data">
+                <span class="metric-val" id="metric-storage-size">0 KB</span>
+                <span class="metric-name">Memoria Local</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Registro de eventos de sesión en tiempo real -->
+          <div class="activity-logs-panel">
+            <div class="logs-header">
+              <h3>Registro de Eventos de la Sesión</h3>
+              <span class="log-badge-live">EN VIVO</span>
+            </div>
+            <div id="activity-log-stream" class="activity-log-stream" role="log">
+              <!-- Logs inyectados aquí -->
+            </div>
+          </div>
+
+          <!-- Información de compatibilidad del navegador -->
+          <div class="compatibility-panel">
+            <h3>Diagnóstico de Capacidades del Navegador</h3>
+            <div class="capabilities-grid">
+              <div class="capability-item" id="cap-speech-rec">
+                <span class="cap-status">VERIFICANDO</span>
+                <span class="cap-title">Web Speech Recognition (Dictado)</span>
+              </div>
+              <div class="capability-item" id="cap-speech-synth">
+                <span class="cap-status">VERIFICANDO</span>
+                <span class="cap-title">SpeechSynthesis (Voz del Asistente)</span>
+              </div>
+              <div class="capability-item" id="cap-storage">
+                <span class="cap-status">VERIFICANDO</span>
+                <span class="cap-title">localStorage (Persistencia en Dispositivo)</span>
+              </div>
+              <div class="capability-item" id="cap-audio-api">
+                <span class="cap-status">VERIFICANDO</span>
+                <span class="cap-title">Web Audio API (Síntesis SFX)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: VISTA DE CONFIGURACIÓN -->
+      <section id="view-settings" class="view-panel" aria-label="Ajustes y personalización">
+        <div class="settings-container">
+          <div class="settings-header">
+            <h2 class="view-title">Configuración del Sistema</h2>
+            <p class="view-subtitle">Personaliza la identidad de NOVA, las opciones de voz y la privacidad local.</p>
+          </div>
+
+          <div class="settings-sections-wrap">
+            <!-- Sección: Identidad -->
+            <div class="settings-card">
+              <h3 class="settings-card-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Identidad y Apariencia
+              </h3>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cfg-assistant-name">Nombre del Asistente</label>
+                  <input type="text" id="cfg-assistant-name" class="hud-input" value="NOVA" maxlength="20">
+                </div>
+                <div class="form-group">
+                  <label for="cfg-user-name">Nombre del Usuario</label>
+                  <input type="text" id="cfg-user-name" class="hud-input" value="Operador" maxlength="20">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Esquema de Color / Acento Holográfico</label>
+                <div class="theme-picker-row">
+                  <button type="button" class="theme-btn active" data-color="cyan" title="Cian Clásico JARVIS">
+                    <span class="color-dot color-cyan"></span>
+                    <span>Cian Neón</span>
+                  </button>
+                  <button type="button" class="theme-btn" data-color="blue" title="Azul Cobalto">
+                    <span class="color-dot color-blue"></span>
+                    <span>Azul Éter</span>
+                  </button>
+                  <button type="button" class="theme-btn" data-color="emerald" title="Verde Terminal">
+                    <span class="color-dot color-emerald"></span>
+                    <span>Esmeralda</span>
+                  </button>
+                  <button type="button" class="theme-btn" data-color="purple" title="Púrpura Synth">
+                    <span class="color-dot color-purple"></span>
+                    <span>Púrpura</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección: Voz y Audio -->
+            <div class="settings-card">
+              <h3 class="settings-card-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                Parámetros de Voz (SpeechSynthesis)
+              </h3>
+
+              <div class="form-group switch-row">
+                <div class="switch-info">
+                  <strong>Lectura automática por voz</strong>
+                  <span>NOVA pronunciará sus respuestas en voz alta</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-tts-enabled" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="cfg-voice-select">Voz del sintetizador</label>
+                <select id="cfg-voice-select" class="hud-select">
+                  <option value="">Cargando voces del navegador...</option>
+                </select>
+                <small class="form-hint">Las voces dependen de las instaladas en tu sistema operativo y navegador.</small>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cfg-speech-rate">Velocidad: <span id="val-speech-rate">1.0</span>x</label>
+                  <input type="range" id="cfg-speech-rate" min="0.7" max="1.5" step="0.1" value="1.0" class="hud-range">
+                </div>
+                <div class="form-group">
+                  <label for="cfg-speech-pitch">Tono: <span id="val-speech-pitch">1.0</span></label>
+                  <input type="range" id="cfg-speech-pitch" min="0.5" max="1.5" step="0.1" value="1.0" class="hud-range">
+                </div>
+              </div>
+
+              <button type="button" id="btn-test-voice" class="btn-hud-secondary">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span>Probar Voz de NOVA</span>
+              </button>
+            </div>
+
+            <!-- Sección: Privacidad y Memoria -->
+            <div class="settings-card">
+              <h3 class="settings-card-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Memoria Local y Privacidad
+              </h3>
+
+              <div class="form-group switch-row">
+                <div class="switch-info">
+                  <strong>Guardar conversaciones en este navegador</strong>
+                  <span>Almacena el historial y ajustes en <code>localStorage</code></span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cfg-save-local" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="privacy-notice-box">
+                <p><strong>Aviso de Privacidad y Funcionamiento:</strong></p>
+                <ul>
+                  <li>Este prototipo funciona <strong>exclusivamente en tu dispositivo</strong> (Frontend estático).</li>
+                  <li>No existe ningún backend, base de datos en la nube ni conexión a modelos remotos de IA.</li>
+                  <li>Las respuestas se generan mediante lógica y patrones en JavaScript local.</li>
+                  <li>Puedes borrar todos los datos almacenados localmente en cualquier momento.</li>
+                </ul>
+              </div>
+
+              <div class="danger-zone-box">
+                <button type="button" id="btn-purge-all-data" class="btn-danger-neon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <span>Borrar todos los datos locales de NOVA</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast de notificaciones del sistema -->
+  <div id="toast-notification" class="hud-toast hidden" role="alert" aria-live="polite">
+    <span class="toast-icon">⚡</span>
+    <span id="toast-message" class="toast-message">Mensaje del sistema</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
