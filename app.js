@@ -27,10 +27,18 @@
 
   const state = {
     settings: { ...DEFAULT_SETTINGS },
-    currentView: 'chat', // 'chat', 'immersive', 'activity', 'settings'
+    currentView: 'chat', // 'chat', 'immersive', 'activity', 'settings', 'login'
     assistantState: 'idle', // 'idle', 'listening', 'processing', 'speaking', 'error'
     currentConversationId: null,
     conversations: [], // [{ id, title, createdAt, messages: [{ sender, text, timestamp }] }]
+    auth: {
+      isAuthenticated: false,
+      operatorName: 'Operador',
+      clearance: 'Nivel 3 — Operador de Terminal',
+      token: null,
+      loginTime: null,
+      rememberMe: true
+    },
     metrics: {
       sessionStartTime: Date.now(),
       totalMessages: 0,
@@ -77,7 +85,8 @@
       chat: document.getElementById('view-chat'),
       immersive: document.getElementById('view-immersive'),
       activity: document.getElementById('view-activity'),
-      settings: document.getElementById('view-settings')
+      settings: document.getElementById('view-settings'),
+      login: document.getElementById('view-login')
     },
 
     // Chat
@@ -128,6 +137,31 @@
     btnTestVoice: document.getElementById('btn-test-voice'),
     cfgSaveLocal: document.getElementById('cfg-save-local'),
     btnPurgeAllData: document.getElementById('btn-purge-all-data'),
+
+    // Acceso y Autenticación (Login)
+    loginFormWrapper: document.getElementById('login-form-wrapper'),
+    loginActiveSession: document.getElementById('login-active-session'),
+    loginSessionBadge: document.getElementById('login-session-badge'),
+    sessionBadgeText: document.getElementById('session-badge-text'),
+    formLogin: document.getElementById('form-login'),
+    loginUsername: document.getElementById('login-username'),
+    loginPassword: document.getElementById('login-password'),
+    btnTogglePassword: document.getElementById('btn-toggle-password'),
+    loginClearance: document.getElementById('login-clearance'),
+    loginRememberMe: document.getElementById('login-remember-me'),
+    btnSubmitLogin: document.getElementById('btn-submit-login'),
+    btnDemoQuickLogin: document.getElementById('btn-demo-quick-login'),
+    biometricScannerPad: document.getElementById('biometric-scanner-pad'),
+    scannerLaser: document.getElementById('scanner-laser'),
+    biometricStatusTitle: document.getElementById('biometric-status-title'),
+    biometricStatusSub: document.getElementById('biometric-status-sub'),
+    btnTriggerBiometric: document.getElementById('btn-trigger-biometric'),
+    profileClearanceBadge: document.getElementById('profile-clearance-badge'),
+    profileOperatorName: document.getElementById('profile-operator-name'),
+    profileTokenVal: document.getElementById('profile-token-val'),
+    profileLogintimeVal: document.getElementById('profile-logintime-val'),
+    btnSessionGoChat: document.getElementById('btn-session-go-chat'),
+    btnLogout: document.getElementById('btn-logout'),
 
     // Toast
     toast: document.getElementById('toast-notification'),
@@ -222,6 +256,9 @@
         if (data.conversations && Array.isArray(data.conversations)) {
           state.conversations = data.conversations;
         }
+        if (data.auth && data.auth.rememberMe) {
+          state.auth = { ...state.auth, ...data.auth };
+        }
       }
     } catch (e) {
       console.warn('NOVA: Error al leer localStorage:', e);
@@ -233,7 +270,8 @@
     try {
       const payload = {
         settings: state.settings,
-        conversations: state.conversations
+        conversations: state.conversations,
+        auth: state.auth && state.auth.rememberMe ? state.auth : null
       };
       localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(payload));
       updateStorageMetric();
@@ -248,7 +286,16 @@
       state.settings = { ...DEFAULT_SETTINGS };
       state.conversations = [];
       state.currentConversationId = null;
+      state.auth = {
+        isAuthenticated: false,
+        operatorName: 'Operador',
+        clearance: 'Nivel 3 — Operador de Terminal',
+        token: null,
+        loginTime: null,
+        rememberMe: true
+      };
       applySettingsToUI();
+      updateAuthUI();
       renderConversationList();
       resetChatView();
       logEvent('Memoria local eliminada por el usuario');
@@ -630,6 +677,22 @@
     if (/(configuraci[oó]n|ajustes|opciones)/i.test(raw)) {
       switchView('settings');
       return `Abriendo el panel de configuración del sistema.`;
+    }
+
+    if (/(login|iniciar sesi[oó]n|autenticaci[oó]n|acceso|credenciales)/i.test(raw)) {
+      switchView('login');
+      if (state.auth.isAuthenticated) {
+        return `Ya te encuentras autenticado como **${state.auth.operatorName}** (${state.auth.clearance}). Te he transferido a la terminal de acceso para ver los detalles de tu sesión.`;
+      }
+      return `Abriendo la terminal de autenticación de operadores. Puedes ingresar tus credenciales o usar el escáner biométrico dactilar.`;
+    }
+
+    if (/(cerrar sesi[oó]n|logout|desconectar operador)/i.test(raw)) {
+      if (state.auth.isAuthenticated) {
+        logoutUser();
+        return `Sesión cerrada correctamente. El terminal de NOVA ha sido bloqueado en modo de espera.`;
+      }
+      return `Actualmente no hay una sesión de operador activa para cerrar.`;
     }
 
     if (/(limpiar chat|nueva sesi[oó]n|reiniciar conversaci[oó]n)/i.test(raw)) {
@@ -1138,6 +1201,93 @@ Puedes probar comandos como *"¿Qué hora es?"*, *"Diagnóstico"*, o pedirme *"M
   }
 
   // --------------------------------------------------------------------------
+  // 14.5 GESTIÓN DE ACCESO Y AUTENTICACIÓN (LOGIN & BIOMETRÍA)
+  // --------------------------------------------------------------------------
+  function updateAuthUI() {
+    if (!DOM.loginFormWrapper || !DOM.loginActiveSession) return;
+
+    if (state.auth.isAuthenticated) {
+      DOM.loginFormWrapper.style.display = 'none';
+      DOM.loginActiveSession.classList.remove('hidden');
+
+      DOM.loginSessionBadge.className = 'session-status-badge authenticated';
+      DOM.sessionBadgeText.textContent = 'OPERADOR CONECTADO';
+
+      DOM.profileOperatorName.textContent = state.auth.operatorName;
+      DOM.profileClearanceBadge.textContent = state.auth.clearance;
+      DOM.profileTokenVal.textContent = state.auth.token || 'NOV-SEC-ACTIVE';
+      DOM.profileLogintimeVal.textContent = state.auth.loginTime || new Date().toLocaleTimeString();
+
+      // Sincronizar nombre de usuario global para el chat
+      state.settings.userName = state.auth.operatorName;
+      if (DOM.cfgUserName) DOM.cfgUserName.value = state.auth.operatorName;
+    } else {
+      DOM.loginFormWrapper.style.display = 'grid';
+      DOM.loginActiveSession.classList.add('hidden');
+
+      DOM.loginSessionBadge.className = 'session-status-badge unauthenticated';
+      DOM.sessionBadgeText.textContent = 'NO AUTENTICADO';
+    }
+  }
+
+  function loginUser(username, clearance, method) {
+    const validName = (username || '').trim() || 'Operador';
+    const validClearance = clearance || 'Nivel 3 — Operador de Terminal';
+
+    state.auth.isAuthenticated = true;
+    state.auth.operatorName = validName;
+    state.auth.clearance = validClearance;
+    state.auth.token = 'NOV-' + Math.floor(1000 + Math.random() * 9000) + '-AUTH';
+    state.auth.loginTime = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    state.auth.rememberMe = DOM.loginRememberMe ? DOM.loginRememberMe.checked : true;
+
+    updateAuthUI();
+    savePersistedData();
+    playSfx('response');
+
+    const welcomeMsg = `Acceso concedido a ${validName} (${validClearance}).`;
+    logEvent(`Autenticación de operador exitosa mediante ${method || 'credenciales'}: ${validName}`);
+    showToast(welcomeMsg);
+
+    // Hablar bienvenida por voz si está activa
+    speakText(`Identidad confirmada. Bienvenido de nuevo, ${validName}. Todos los sistemas de NOVA están desbloqueados.`);
+  }
+
+  function logoutUser() {
+    state.auth.isAuthenticated = false;
+    state.auth.token = null;
+    state.auth.loginTime = null;
+
+    updateAuthUI();
+    savePersistedData();
+    playSfx('mic-end');
+
+    logEvent('Sesión de operador cerrada.');
+    showToast('Sesión de operador finalizada.');
+  }
+
+  function triggerBiometricScan() {
+    if (!DOM.biometricScannerPad || !DOM.scannerLaser) return;
+
+    playSfx('mic-start');
+    DOM.biometricScannerPad.classList.add('scanning');
+    DOM.scannerLaser.classList.add('scanning');
+    DOM.biometricStatusTitle.textContent = 'ESCANEANDO BIOMETRÍA...';
+    DOM.biometricStatusSub.textContent = 'Analizando patrón dactilar y firma neural...';
+
+    setTimeout(() => {
+      DOM.biometricScannerPad.classList.remove('scanning');
+      DOM.scannerLaser.classList.remove('scanning');
+      DOM.biometricStatusTitle.textContent = 'IDENTIDAD CONFIRMADA';
+      DOM.biometricStatusSub.textContent = 'Acceso validado por sensor biométrico.';
+
+      const selectedName = DOM.loginUsername.value.trim() || 'Operador_Alpha';
+      const selectedClearance = DOM.loginClearance.value;
+      loginUser(selectedName, selectedClearance, 'Biometría Holográfica');
+    }, 1400);
+  }
+
+  // --------------------------------------------------------------------------
   // 15. REGISTRO DE EVENTOS DEL USUARIO (LISTENERS)
   // --------------------------------------------------------------------------
   function setupEventListeners() {
@@ -1304,6 +1454,53 @@ Puedes probar comandos como *"¿Qué hora es?"*, *"Diagnóstico"*, o pedirme *"M
         purgeAllData();
       }
     });
+
+    // 7. Acceso y Autenticación (Login)
+    if (DOM.formLogin) {
+      DOM.formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = DOM.loginUsername.value.trim();
+        const clearance = DOM.loginClearance.value;
+        loginUser(username, clearance, 'Credenciales');
+      });
+    }
+
+    if (DOM.btnDemoQuickLogin) {
+      DOM.btnDemoQuickLogin.addEventListener('click', () => {
+        loginUser('Operador_Demo', 'Nivel 4 — Administrador Supremo (JARVIS)', 'Acceso Rápido');
+      });
+    }
+
+    if (DOM.btnTogglePassword) {
+      DOM.btnTogglePassword.addEventListener('click', () => {
+        const isPassword = DOM.loginPassword.type === 'password';
+        DOM.loginPassword.type = isPassword ? 'text' : 'password';
+      });
+    }
+
+    if (DOM.biometricScannerPad) {
+      DOM.biometricScannerPad.addEventListener('click', triggerBiometricScan);
+      DOM.biometricScannerPad.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerBiometricScan();
+        }
+      });
+    }
+
+    if (DOM.btnTriggerBiometric) {
+      DOM.btnTriggerBiometric.addEventListener('click', triggerBiometricScan);
+    }
+
+    if (DOM.btnLogout) {
+      DOM.btnLogout.addEventListener('click', logoutUser);
+    }
+
+    if (DOM.btnSessionGoChat) {
+      DOM.btnSessionGoChat.addEventListener('click', () => {
+        switchView('chat');
+      });
+    }
   }
 
   // --------------------------------------------------------------------------
@@ -1315,6 +1512,7 @@ Puedes probar comandos como *"¿Qué hora es?"*, *"Diagnóstico"*, o pedirme *"M
     // 1. Cargar persistencia
     loadPersistedData();
     applySettingsToUI();
+    updateAuthUI();
     renderConversationList();
 
     // 2. Si no hay conversaciones, crear la primera

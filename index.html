@@ -67,6 +67,10 @@
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span>Configuración</span>
         </button>
+        <button id="nav-btn-login" class="nav-tab" data-view="login">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Acceso / Login</span>
+        </button>
       </nav>
 
       <!-- Historial de conversaciones guardadas -->
@@ -517,6 +521,190 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 5: VISTA DE AUTENTICACIÓN / LOGIN -->
+      <section id="view-login" class="view-panel" aria-label="Terminal de acceso y autenticación">
+        <div class="login-view-container">
+          <div class="login-header">
+            <div>
+              <span class="hud-mono-tag">SEGURIDAD // PROTOCOLO DE IDENTIFICACIÓN</span>
+              <h2 class="view-title">Terminal de Autenticación</h2>
+              <p class="view-subtitle">Control de acceso de operadores y validación de credenciales para NOVA.</p>
+            </div>
+            <div id="login-session-badge" class="session-status-badge unauthenticated">
+              <span class="status-pulse-dot"></span>
+              <span id="session-badge-text">NO AUTENTICADO</span>
+            </div>
+          </div>
+
+          <!-- ESTADO 1: Formulario de Login / Biometría (visible cuando NO está autenticado) -->
+          <div id="login-form-wrapper" class="login-cards-grid">
+            
+            <!-- Tarjeta 1: Acceso por Credenciales -->
+            <div class="login-card credential-card">
+              <div class="card-chip-header">
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                  <h3 class="card-chip-title">Credenciales de Operador</h3>
+                  <span class="card-chip-subtitle">Ingreso mediante identificador y clave de acceso</span>
+                </div>
+              </div>
+
+              <form id="form-login" class="login-form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="login-username">Identificador de Operador</label>
+                  <div class="input-icon-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <input type="text" id="login-username" class="hud-input input-with-icon" placeholder="Ej: Operador_01 o tu nombre" required value="Operador">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="login-password">Código de Acceso / Contraseña</label>
+                  <div class="input-icon-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input type="password" id="login-password" class="hud-input input-with-icon" placeholder="••••••••••••" value="nova-protocol-2026">
+                    <button type="button" id="btn-toggle-password" class="btn-toggle-visibility" title="Mostrar/ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="login-clearance">Nivel de Autorización (Clearance)</label>
+                  <select id="login-clearance" class="hud-select">
+                    <option value="Nivel 1 — Observador / Invitado">Nivel 1 — Observador / Invitado</option>
+                    <option value="Nivel 2 — Técnico de Mantenimiento">Nivel 2 — Técnico de Mantenimiento</option>
+                    <option value="Nivel 3 — Operador de Terminal" selected>Nivel 3 — Operador de Terminal</option>
+                    <option value="Nivel 4 — Administrador Supremo (JARVIS)">Nivel 4 — Administrador Supremo (JARVIS)</option>
+                  </select>
+                </div>
+
+                <div class="form-group switch-row compact-switch">
+                  <div class="switch-info">
+                    <span style="font-size: 0.82rem; color: var(--text-muted);">Recordar sesión en este navegador</span>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="login-remember-me" checked>
+                    <span class="slider"></span>
+                  </label>
+                </div>
+
+                <div class="form-action-buttons">
+                  <button type="submit" id="btn-submit-login" class="btn-neon-primary btn-full-width">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    <span>Autenticar Operador</span>
+                  </button>
+
+                  <button type="button" id="btn-demo-quick-login" class="btn-hud-secondary btn-full-width">
+                    <span>⚡ Acceso Rápido Automático</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Tarjeta 2: Escáner Biométrico Holográfico -->
+            <div class="login-card biometric-card">
+              <div class="card-chip-header">
+                <div class="chip-icon">
+                  <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                </div>
+                <div>
+                  <h3 class="card-chip-title">Identificación Biométrica</h3>
+                  <span class="card-chip-subtitle">Validación neural y dactilar simulada</span>
+                </div>
+              </div>
+
+              <div class="biometric-scanner-zone">
+                <div class="biometric-pad" id="biometric-scanner-pad" role="button" tabindex="0" title="Haz clic para iniciar el escaneo biométrico" aria-label="Sensor biométrico">
+                  <div class="scanner-laser-line" id="scanner-laser"></div>
+                  <div class="biometric-fingerprint-svg">
+                    <svg viewBox="0 0 24 24" width="76" height="76" stroke="currentColor" stroke-width="1.3" fill="none">
+                      <path d="M12 2C6.48 2 2 6.48 2 12c0 2.85 1.2 5.41 3.12 7.23"/>
+                      <path d="M12 6c-3.31 0-6 2.69-6 6 0 1.66.67 3.16 1.76 4.24"/>
+                      <path d="M12 10c-1.1 0-2 .9-2 2 0 .55.22 1.05.59 1.41"/>
+                      <path d="M16 12c0-2.21-1.79-4-4-4"/>
+                      <path d="M19.07 16.93A9.956 9.956 0 0 0 22 12c0-5.52-4.48-10-10-10"/>
+                      <path d="M17.66 18.34A7.95 7.95 0 0 0 20 12c0-4.42-3.58-8-8-8"/>
+                    </svg>
+                  </div>
+                  <div class="scanner-rings">
+                    <span class="s-ring ring-1"></span>
+                    <span class="s-ring ring-2"></span>
+                  </div>
+                </div>
+
+                <div class="biometric-info-text">
+                  <span id="biometric-status-title" class="biometric-label">ESPERANDO CONTACTO</span>
+                  <p id="biometric-status-sub" class="biometric-sub">Haz clic sobre el sensor biométrico para escanear huella digital.</p>
+                </div>
+
+                <button type="button" id="btn-trigger-biometric" class="btn-hud-tool">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  <span>Iniciar Escaneo Láser</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ESTADO 2: Perfil y Sesión Activa (visible cuando SÍ está autenticado) -->
+          <div id="login-active-session" class="login-session-view hidden">
+            <div class="session-profile-card">
+              <div class="profile-hologram-avatar">
+                <div class="avatar-ring-outer"></div>
+                <div class="avatar-ring-inner"></div>
+                <div class="avatar-icon-center">
+                  <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.8" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <span class="avatar-verified-badge">✓</span>
+              </div>
+
+              <div class="session-profile-details">
+                <div class="profile-tag-row">
+                  <span class="clearance-badge" id="profile-clearance-badge">NIVEL 3 — OPERADOR</span>
+                  <span class="active-status-tag">SESIÓN ACTIVA</span>
+                </div>
+                <h3 class="profile-operator-name" id="profile-operator-name">Operador</h3>
+                <p class="profile-system-desc">Identidad autenticada en el nodo local de NOVA. Todos los módulos y directivas desbloqueados.</p>
+
+                <div class="session-meta-grid">
+                  <div class="meta-box">
+                    <span class="meta-box-label">ID DE SESIÓN TOKEN</span>
+                    <code class="meta-box-val" id="profile-token-val">NOV-8942-AUTH</code>
+                  </div>
+                  <div class="meta-box">
+                    <span class="meta-box-label">HORA DE CONEXIÓN</span>
+                    <span class="meta-box-val" id="profile-logintime-val">16:00:00</span>
+                  </div>
+                  <div class="meta-box">
+                    <span class="meta-box-label">PROTOCOLO DE ENCRIPTACIÓN</span>
+                    <span class="meta-box-val">LOCAL SHA-256 HUD</span>
+                  </div>
+                  <div class="meta-box">
+                    <span class="meta-box-label">ESTADO DE INTERFAZ</span>
+                    <span class="meta-box-val text-glow">ENLACE NEURAL ESTABLE</span>
+                  </div>
+                </div>
+
+                <div class="session-actions-row">
+                  <button type="button" id="btn-session-go-chat" class="btn-neon-primary">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Ir a la Terminal de Chat</span>
+                  </button>
+                  <button type="button" id="btn-logout" class="btn-danger-neon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 

@@ -47,7 +47,13 @@ mi negocio/
    - Botones rápidos de sugerencia inicial.
    - Acciones por mensaje: reproducción por voz en sintetizador y copia rápida al portapapeles.
 
-3. **Interacción por Voz Bidireccional (Web Speech API):**
+3. **Terminal de Acceso y Autenticación (Login):**
+   - Acceso de operadores mediante credenciales (usuario, contraseña con toggle de visibilidad y niveles de autorización *Clearance*).
+   - **Escáner Biométrico Holográfico:** Validación dactilar y neural con animación de barrido láser y efectos de sonido.
+   - Tarjeta de sesión activa con generación de token de seguridad, registro de hora y botón de cierre de sesión.
+   - Sincronización automática de la identidad del operador con el motor conversacional de NOVA.
+
+4. **Interacción por Voz Bidireccional (Web Speech API):**
    - **Dictado (SpeechRecognition):** Activación con micrófono, visualización de transcripción en vivo y cancelación inmediata.
    - **Lectura en voz alta (SpeechSynthesis):** Detección automática de voces en español del sistema operativo, ajuste de tono y velocidad.
 
